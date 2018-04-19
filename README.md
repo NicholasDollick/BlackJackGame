@@ -7,6 +7,8 @@ Upon launch, an sqlite database is initialized and is used to hold user credenti
 
 **Cards**: contains all 52 faces and cardback
 
+**Screenshots**: pictures of program in runtime
+
 **src**: contains program source code
 
 
