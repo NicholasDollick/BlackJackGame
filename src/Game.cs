@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BlackJackGame
@@ -25,6 +21,9 @@ namespace BlackJackGame
         {
             InitializeComponent();
             label5.Text = name;
+            trainerOff.Checked = true;
+            trainerLabel.Text = "";
+            idealMoveLabel.Visible = false;
         }
 
         private void Play()
@@ -33,6 +32,7 @@ namespace BlackJackGame
 
             hitButton.Enabled = true;
             standButton.Enabled = true;
+            startButton.Enabled = false;
 
             playerHand.Clear();
             dealerHand.Clear();
@@ -64,7 +64,22 @@ namespace BlackJackGame
                 label3.Text = ("You Win");
                 hitButton.Enabled = false;
                 standButton.Enabled = false;
+                startButton.Enabled = true;
             }
+
+
+            if (trainerOn.Checked)
+            {
+                idealMoveLabel.Visible = true;
+                trainerLabel.Text = Trainer.getMove(playerHand, dealerHand[1]);
+            }
+            else
+            {
+                idealMoveLabel.Visible = false;
+                trainerLabel.Text = "";
+            }
+
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -89,9 +104,9 @@ namespace BlackJackGame
                 PictureBox newPictureBox = new PictureBox();
                 newPictureBox.Width = 75;
                 newPictureBox.Height = 100;
-                if(handID.Equals("player"))
+                if (handID.Equals("player"))
                     playerCardImages.Add(SizeImage(newPictureBox, card.getCardImage()));
-                if(handID.Equals("dealer"))
+                if (handID.Equals("dealer"))
                     dealerCardImages.Add(SizeImage(newPictureBox, card.getCardImage()));
             }
         }
@@ -109,7 +124,7 @@ namespace BlackJackGame
         private void exitButton_Click(object sender, EventArgs e)
         {
             Application.Exit();
-            
+
         }
 
         private void hitButton_Click(object sender, EventArgs e)
@@ -117,15 +132,22 @@ namespace BlackJackGame
             playerHand.Add(deck.dealCard());
             CreateControls(playerHand, "player");
             UpdatePlayerHand(initialState);
-            initialState += (3 + count++); 
+            initialState += (3 + count++);
 
             playerSum = CheckSum(playerHand);
             label1.Text = playerSum.ToString();
+            if (trainerOn.Checked && !trainerLabel.Text.Equals("")) //makes sure the trainer cant be turned on midturn
+            {
+                trainerLabel.Text = Trainer.getMove(playerHand, dealerHand[1]);
+            }
+
             if (playerSum > 21)
             {
                 label3.Text = ("You Lose");
                 hitButton.Enabled = false;
                 standButton.Enabled = false;
+                startButton.Enabled = true;
+                trainerLabel.Text = "";
             }
 
             if (playerSum == 21)
@@ -133,6 +155,8 @@ namespace BlackJackGame
                 label3.Text = ("You Win");
                 hitButton.Enabled = false;
                 standButton.Enabled = false;
+                startButton.Enabled = true;
+                trainerLabel.Text = "";
             }
         }
 
@@ -146,7 +170,7 @@ namespace BlackJackGame
             label2.Text = dealerSum.ToString();
             while (dealerSum < 17)
             {
-                
+
                 dealerHand.Add(deck.dealCard());
                 CreateControls(dealerHand, "dealer");
                 UpdateDealerHand(initialCardCount);
@@ -159,21 +183,33 @@ namespace BlackJackGame
 
             EndOfTurn(dealerSum, playerSum);
         }
-        
+
 
         private void EndOfTurn(int dealer, int player)
         {
             hitButton.Enabled = false;
             standButton.Enabled = false;
 
-            if(dealer > 21)
+            if (dealer > 21)
+            {
                 label3.Text = ("You Win");
-            else if(dealer > player)
+                startButton.Enabled = true;
+            }
+            else if (dealer > player)
+            {
                 label3.Text = ("You Lose");
-            else if(player > dealer)
+                startButton.Enabled = true;
+            }
+            else if (player > dealer)
+            {
                 label3.Text = ("You Win");
+                startButton.Enabled = true;
+            }
             else if (player == dealer)
+            {
                 label3.Text = ("Push");
+                startButton.Enabled = true;
+            }
         }
 
         private void UpdatePlayerHand(int initial)
@@ -245,8 +281,6 @@ namespace BlackJackGame
                 this.Controls.Add(dealerCardImages[i]);
             }
         }
-
-
 
     }
 }
